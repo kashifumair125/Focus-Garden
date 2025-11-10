@@ -1,19 +1,37 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 /// Service to handle audio feedback for the app
 class AudioService {
   static AudioService? _instance;
   static AudioService get instance => _instance ??= AudioService._();
 
-  AudioService._();
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  bool _soundEnabled = true;
+
+  AudioService._() {
+    _initAudio();
+  }
+
+  Future<void> _initAudio() async {
+    await _audioPlayer.setReleaseMode(ReleaseMode.stop);
+    // Set a moderate volume
+    await _audioPlayer.setVolume(0.7);
+  }
+
+  /// Enable or disable sound effects
+  void setSoundEnabled(bool enabled) {
+    _soundEnabled = enabled;
+  }
 
   /// Play plant unlock sound
   Future<void> playPlantUnlock() async {
     try {
       await HapticFeedback.lightImpact();
-      // Note: For actual audio playback, you would use audioplayers package
-      // await AudioPlayer().play(AssetSource('sounds/plant_unlock.mp3'));
+      if (_soundEnabled) {
+        await _audioPlayer.play(AssetSource('sounds/plant_unlock.mp3'));
+      }
       if (kDebugMode) {
         print('🔊 Playing plant unlock sound');
       }
@@ -28,8 +46,9 @@ class AudioService {
   Future<void> playTimerComplete() async {
     try {
       await HapticFeedback.mediumImpact();
-      // Note: For actual audio playback, you would use audioplayers package
-      // await AudioPlayer().play(AssetSource('sounds/timer_complete.mp3'));
+      if (_soundEnabled) {
+        await _audioPlayer.play(AssetSource('sounds/timer_complete.mp3'));
+      }
       if (kDebugMode) {
         print('🔊 Playing timer complete sound');
       }
@@ -66,5 +85,21 @@ class AudioService {
         print('Error playing celebration sound: $e');
       }
     }
+  }
+
+  /// Play button tap sound
+  Future<void> playButtonTap() async {
+    try {
+      await HapticFeedback.lightImpact();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error playing button tap: $e');
+      }
+    }
+  }
+
+  /// Dispose of resources
+  void dispose() {
+    _audioPlayer.dispose();
   }
 }
