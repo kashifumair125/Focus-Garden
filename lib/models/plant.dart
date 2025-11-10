@@ -71,6 +71,36 @@ class Plant extends HiveObject {
     }
     return Icons.local_florist; // Default
   }
+
+  // Get emoji representation for plants
+  String get emoji {
+    if (name.toLowerCase().contains('daisy') || name.toLowerCase().contains('white')) {
+      return '🌼';
+    } else if (name.toLowerCase().contains('sprout')) {
+      return '🌱';
+    } else if (name.toLowerCase().contains('sunflower')) {
+      return '🌻';
+    } else if (name.toLowerCase().contains('fern')) {
+      return '🌿';
+    } else if (name.toLowerCase().contains('rose')) {
+      return '🌹';
+    } else if (name.toLowerCase().contains('tree') || name.toLowerCase().contains('oak')) {
+      return '🌳';
+    } else if (name.toLowerCase().contains('orchid')) {
+      return '🌺';
+    } else if (name.toLowerCase().contains('bonsai')) {
+      return '🪴';
+    } else if (name.toLowerCase().contains('cactus')) {
+      return '🌵';
+    } else if (name.toLowerCase().contains('tulip')) {
+      return '🌷';
+    } else if (name.toLowerCase().contains('cherry')) {
+      return '🌸';
+    } else if (name.toLowerCase().contains('lotus')) {
+      return '🪷';
+    }
+    return '🌿'; // Default
+  }
 }
 
 @HiveType(typeId: 2)
@@ -94,90 +124,145 @@ enum PlantRarity {
 // Pre-defined plants that can be unlocked
 // This would normally come from a JSON file or be more dynamic
 class PlantDatabase {
+  // Helper to create a plant template (unlockedAt will be set when actually unlocked)
+  static Plant _createPlant({
+    required String id,
+    required String name,
+    required String description,
+    required String imagePath,
+    required int requiredMinutes,
+    required PlantRarity rarity,
+    String? animationPath,
+  }) {
+    return Plant(
+      id: id,
+      name: name,
+      description: description,
+      imagePath: imagePath,
+      unlockedAt: DateTime(2000), // Use past date for templates
+      requiredMinutes: requiredMinutes,
+      rarity: rarity,
+      animationPath: animationPath,
+    );
+  }
+
   static final List<Plant> allPlants = [
     // Common plants (5-15 minutes)
-    Plant(
+    _createPlant(
       id: 'daisy_001',
       name: 'White Daisy',
       description: 'A simple, cheerful flower for your first focus session.',
       imagePath: 'assets/plants/daisy.png',
-      unlockedAt: DateTime.now(),
       requiredMinutes: 5,
       rarity: PlantRarity.common,
       animationPath: 'assets/animations/plant_growing.json',
     ),
-    Plant(
+    _createPlant(
       id: 'sprout_001',
       name: 'Green Sprout',
       description: 'The beginning of something beautiful.',
       imagePath: 'assets/plants/sprout.png',
-      unlockedAt: DateTime.now(),
       requiredMinutes: 10,
+      rarity: PlantRarity.common,
+    ),
+    _createPlant(
+      id: 'tulip_001',
+      name: 'Pink Tulip',
+      description: 'A delicate bloom of early spring.',
+      imagePath: 'assets/plants/tulip.png',
+      requiredMinutes: 15,
       rarity: PlantRarity.common,
     ),
 
     // Uncommon plants (20-30 minutes)
-    Plant(
+    _createPlant(
       id: 'sunflower_001',
       name: 'Sunflower',
       description: 'Bright and cheerful, always facing the sun.',
       imagePath: 'assets/plants/sunflower.png',
-      unlockedAt: DateTime.now(),
-      requiredMinutes: 25,
+      requiredMinutes: 20,
       rarity: PlantRarity.uncommon,
     ),
-    Plant(
+    _createPlant(
       id: 'fern_001',
       name: 'Forest Fern',
       description: 'An elegant plant from the deep forest.',
       imagePath: 'assets/plants/fern.png',
-      unlockedAt: DateTime.now(),
+      requiredMinutes: 25,
+      rarity: PlantRarity.uncommon,
+    ),
+    _createPlant(
+      id: 'cactus_001',
+      name: 'Desert Cactus',
+      description: 'Resilient and strong, thriving in harsh conditions.',
+      imagePath: 'assets/plants/cactus.png',
       requiredMinutes: 30,
       rarity: PlantRarity.uncommon,
     ),
 
-    // Rare plants (45+ minutes)
-    Plant(
+    // Rare plants (45-60 minutes)
+    _createPlant(
       id: 'rose_001',
       name: 'Red Rose',
       description: 'A beautiful rose earned through dedication.',
       imagePath: 'assets/plants/rose.png',
-      unlockedAt: DateTime.now(),
       requiredMinutes: 45,
       rarity: PlantRarity.rare,
       animationPath: 'assets/animations/celebration.json',
     ),
-    Plant(
+    _createPlant(
+      id: 'cherry_001',
+      name: 'Cherry Blossom',
+      description: 'Delicate petals that represent fleeting beauty.',
+      imagePath: 'assets/plants/cherry.png',
+      requiredMinutes: 50,
+      rarity: PlantRarity.rare,
+    ),
+    _createPlant(
       id: 'tree_001',
       name: 'Oak Sapling',
       description: 'Strong and steady, like your focus habits.',
       imagePath: 'assets/plants/oak_tree.png',
-      unlockedAt: DateTime.now(),
       requiredMinutes: 60,
       rarity: PlantRarity.rare,
       animationPath: 'assets/animations/plant_growing.json',
     ),
 
-    // Epic plants (90+ minutes)
-    Plant(
+    // Epic plants (75-100 minutes)
+    _createPlant(
       id: 'orchid_001',
       name: 'Purple Orchid',
       description: 'A rare and exotic beauty.',
       imagePath: 'assets/plants/orchid.png',
-      unlockedAt: DateTime.now(),
+      requiredMinutes: 75,
+      rarity: PlantRarity.epic,
+    ),
+    _createPlant(
+      id: 'lotus_001',
+      name: 'Lotus Flower',
+      description: 'Symbol of purity and enlightenment.',
+      imagePath: 'assets/plants/lotus.png',
       requiredMinutes: 90,
       rarity: PlantRarity.epic,
     ),
 
     // Legendary plants (120+ minutes)
-    Plant(
+    _createPlant(
       id: 'bonsai_001',
       name: 'Ancient Bonsai',
       description: 'A masterpiece of patience and dedication.',
       imagePath: 'assets/plants/bonsai.png',
-      unlockedAt: DateTime.now(),
       requiredMinutes: 120,
       rarity: PlantRarity.legendary,
+    ),
+    _createPlant(
+      id: 'world_tree_001',
+      name: 'World Tree',
+      description: 'The ultimate achievement for a master of focus.',
+      imagePath: 'assets/plants/world_tree.png',
+      requiredMinutes: 180,
+      rarity: PlantRarity.legendary,
+      animationPath: 'assets/animations/celebration.json',
     ),
   ];
 

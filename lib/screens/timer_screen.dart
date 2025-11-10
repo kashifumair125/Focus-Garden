@@ -4,6 +4,8 @@ import '../services/timer_service.dart';
 import '../services/storage_service.dart';
 import '../services/reward_service.dart';
 import '../services/audio_service.dart';
+import '../services/gamification_service.dart';
+import '../services/quotes_service.dart';
 import '../models/focus_session.dart';
 import '../models/plant.dart';
 import '../widgets/circular_timer.dart';
@@ -22,11 +24,33 @@ class TimerScreen extends ConsumerStatefulWidget {
 
 class _TimerScreenState extends ConsumerState<TimerScreen> {
   DateTime? _sessionStartTime;
+  String _motivationalQuote = '';
+  String _quoteAuthor = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMotivationalQuote();
+  }
+
+  void _loadMotivationalQuote() {
+    final stats = ref.read(statsProvider);
+    final quote = QuotesService.instance.getContextualQuote(
+      currentStreak: stats['currentStreak'] as int,
+      totalSessions: stats['completedSessions'] as int,
+    );
+    setState(() {
+      _motivationalQuote = quote['text']!;
+      _quoteAuthor = quote['author']!;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final timerState = ref.watch(timerProvider);
     final timerService = ref.read(timerProvider.notifier);
+    final userLevel = ref.watch(gamificationServiceProvider);
+    final challengeProgress = ref.watch(challengeProgressProvider);
 
     // Listen for timer completion
     ref.listen<TimerState>(timerProvider, (previous, current) {
@@ -63,6 +87,20 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
             child: IntrinsicHeight(
               child: Column(
                 children: [
+                  // User level and XP display
+                  _buildLevelCard(userLevel),
+                  const SizedBox(height: 12),
+
+                  // Daily challenge card
+                  _buildDailyChallengeCard(challengeProgress),
+                  const SizedBox(height: 12),
+
+                  // Motivational quote
+                  if (timerState.status == TimerStatus.initial)
+                    _buildMotivationalQuote(),
+
+                  const SizedBox(height: 12),
+
                   // Session info and next reward preview
                   _buildSessionInfo(),
                   const SizedBox(height: 20),
@@ -244,18 +282,34 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
     final storageService = ref.read(storageServiceProvider);
     await storageService.saveFocusSession(session);
 
+    // Award XP
+    final gamificationService = ref.read(gamificationServiceProvider.notifier);
+    final leveledUp = await gamificationService.awardXP(timerState.totalMinutes);
+
     // Check for plant rewards
     final rewardService = ref.read(rewardServiceProvider);
     final unlockedPlant = await rewardService.processCompletedSession(session);
 
-    // Show reward popup if plant was unlocked
-    if (unlockedPlant != null && mounted) {
-      // Play plant unlock sound
-      await AudioService.instance.playPlantUnlock();
-      _showRewardPopup(unlockedPlant);
-    } else if (mounted) {
-      // Show simple completion message
-      _showCompletionMessage();
+    // Check daily challenge progress
+    final challengeService = ref.read(dailyChallengeServiceProvider);
+    final challengeComplete = challengeService.checkChallengeProgress();
+
+    // Show rewards
+    if (mounted) {
+      if (leveledUp) {
+        _showLevelUpDialog();
+      } else if (unlockedPlant != null) {
+        // Play plant unlock sound
+        await AudioService.instance.playPlantUnlock();
+        _showRewardPopup(unlockedPlant);
+      } else if (challengeComplete) {
+        _showChallengeCompleteMessage();
+      } else {
+        _showCompletionMessage();
+      }
+
+      // Load new quote for next session
+      _loadMotivationalQuote();
     }
 
     // Reset session start time
@@ -291,6 +345,265 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
+
+  /// Show level up dialog
+  void _showLevelUpDialog() {
+    final userLevel = ref.read(gamificationServiceProvider);
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.trending_up, color: Colors.orange, size: 32),
+            SizedBox(width: 12),
+            Text('Level Up!'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Congratulations!\nYou\'ve reached level ${userLevel.level}',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              userLevel.title,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Awesome!'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Show challenge complete message
+  void _showChallengeCompleteMessage() {
+    final challengeProgress = ref.read(challengeProgressProvider);
+    final challenge = challengeProgress['challenge'] as DailyChallenge;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.emoji_events, color: Colors.white),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text('Daily Challenge Complete! +${challenge.xpReward} XP'),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.purple,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
+
+  /// Build level card
+  Widget _buildLevelCard(UserLevel userLevel) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  '${userLevel.level}',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    userLevel.title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: userLevel.progress,
+                      backgroundColor: Colors.grey[200],
+                      minHeight: 8,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${userLevel.currentXP} / ${userLevel.xpToNextLevel} XP',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build daily challenge card
+  Widget _buildDailyChallengeCard(Map<String, dynamic> progressData) {
+    final challenge = progressData['challenge'] as DailyChallenge;
+    final sessionProgress = progressData['sessionProgress'] as double;
+    final minuteProgress = progressData['minuteProgress'] as double;
+
+    if (challenge.isCompleted) {
+      return Card(
+        color: Colors.green[50],
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.green[700]),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Daily Challenge Complete! 🎉',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final progress = challenge.targetSessions > 0 ? sessionProgress : minuteProgress;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.star, color: Colors.amber[700], size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    challenge.title,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.purple[50],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '+${challenge.xpReward} XP',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.purple[700],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              challenge.description,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: progress,
+                backgroundColor: Colors.grey[200],
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.amber[700]!),
+                minHeight: 6,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build motivational quote card
+  Widget _buildMotivationalQuote() {
+    if (_motivationalQuote.isEmpty) return const SizedBox.shrink();
+
+    return Card(
+      color: Colors.blue[50],
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Icon(Icons.format_quote, color: Colors.blue[700]),
+            const SizedBox(height: 8),
+            Text(
+              _motivationalQuote,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 14,
+                fontStyle: FontStyle.italic,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '- $_quoteAuthor',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[700],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ),
       ),
     );

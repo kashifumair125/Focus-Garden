@@ -28,6 +28,18 @@ dependencies:
   # Utils
   path_provider: ^2.1.1
 
+  # Audio
+  audioplayers: ^6.1.0
+
+  # Notifications
+  flutter_local_notifications: ^18.0.1
+
+  # Charts
+  fl_chart: ^0.69.2
+
+  # Intl for date formatting
+  intl: ^0.19.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

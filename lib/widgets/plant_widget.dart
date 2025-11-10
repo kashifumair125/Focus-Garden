@@ -143,31 +143,31 @@ class _PlantWidgetState extends State<PlantWidget>
         fit: BoxFit.cover,
         animate: true,
         repeat: true,
-      );
-    }
-
-    // Try to show static image
-    if (widget.plant.imagePath.isNotEmpty &&
-        widget.plant.imagePath != 'assets/plants/${widget.plant.id}.png') {
-      return Image.asset(
-        widget.plant.imagePath,
-        fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          // Fallback to icon if image fails to load
-          return Icon(
-            widget.plant.icon,
-            size: widget.size * 0.5,
-            color: widget.plant.rarityColor,
+          // Fallback to emoji if animation fails
+          return Center(
+            child: Text(
+              widget.plant.emoji,
+              style: TextStyle(fontSize: widget.size * 0.6),
+            ),
           );
         },
       );
     }
 
-    // Fallback to icon
-    return Icon(
-      widget.plant.icon,
-      size: widget.size * 0.5,
-      color: widget.plant.rarityColor,
+    // Try to show static image
+    return Image.asset(
+      widget.plant.imagePath,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        // Fallback to emoji if image fails to load
+        return Center(
+          child: Text(
+            widget.plant.emoji,
+            style: TextStyle(fontSize: widget.size * 0.6),
+          ),
+        );
+      },
     );
   }
 }

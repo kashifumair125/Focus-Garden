@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'timer_screen.dart';
 import 'garden_screen.dart';
 import 'stats_screen.dart';
+import 'settings_screen.dart';
 
 /// Main navigation widget with bottom navigation bar
 class MainNavigation extends ConsumerStatefulWidget {
@@ -20,12 +21,13 @@ class _MainNavigationState extends ConsumerState<MainNavigation> {
     TimerScreen(),
     GardenScreen(),
     StatsScreen(),
+    SettingsScreen(),
   ];
 
   // Navigation bar items
   final List<BottomNavigationBarItem> _navItems = const [
     BottomNavigationBarItem(
-      icon: Icon(Icons.timer),
+      icon: Icon(Icons.timer_outlined),
       activeIcon: Icon(Icons.timer),
       label: 'Focus',
       tooltip: 'Focus Timer',
@@ -41,6 +43,12 @@ class _MainNavigationState extends ConsumerState<MainNavigation> {
       activeIcon: Icon(Icons.analytics),
       label: 'Stats',
       tooltip: 'Your Statistics',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.settings_outlined),
+      activeIcon: Icon(Icons.settings),
+      label: 'Settings',
+      tooltip: 'App Settings',
     ),
   ];
 

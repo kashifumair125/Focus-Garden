@@ -4,22 +4,61 @@ A beautiful gamified focus timer app that helps you stay productive while growin
 
 ## ✨ Features
 
-- **⏱️ Focus Timer**: Customizable timer to help you concentrate on tasks
-- **🌿 Plant Rewards**: Unlock beautiful plants by completing focus sessions
-- **🏡 Virtual Garden**: Display and admire your collected plants
-- **📊 Statistics**: Track your focus sessions and productivity over time
+### Core Features
+- **⏱️ Focus Timer**: Customizable Pomodoro-style timer to help you concentrate on tasks
+- **🌿 Plant Rewards**: Unlock 13 beautiful plants by completing focus sessions of varying durations
+- **🏡 Virtual Garden**: Display and admire your collected plants with animated effects
+- **📊 Statistics**: Track your focus sessions, streaks, and productivity over time
 - **🎨 Beautiful UI**: Clean, nature-inspired design with smooth animations
-- **💾 Local Storage**: All your data is stored locally on your device
-- **🔊 Audio Feedback**: Sound notifications when sessions complete
+- **💾 Local Storage**: All your data is stored locally on your device using Hive
+- **🔊 Audio Feedback**: Real sound effects for timer completion and plant unlocks
+
+### Gamification
+- **⭐ XP & Levels**: Earn experience points for every focus session and level up your gardener
+- **🏅 Daily Challenges**: Complete unique daily challenges for bonus XP rewards
+- **🔥 Streak Tracking**: Build and maintain your focus streak across consecutive days
+- **🎯 Achievements**: Unlock special achievements for reaching milestones
+
+### Customization
+- **🎨 9 Garden Themes**: Unlock beautiful themes as you level up (Classic, Forest, Sakura, Ocean, Sunset, Lavender, Autumn, Midnight, Zen)
+- **🔔 Smart Notifications**: Optional daily reminders to keep you on track
+- **⚙️ Flexible Settings**: Customize timer defaults, sounds, and notifications
+- **💬 Motivational Quotes**: Get inspired with contextual motivational quotes
+
+### Enhanced Experience
+- **📈 Progress Tracking**: Visualize your journey with XP bars and progress indicators
+- **🌟 Rarity System**: Plants come in 5 rarity tiers from Common to Legendary
+- **🎉 Celebrations**: Special animations and notifications for level-ups and achievements
+- **📱 Cross-Platform**: Works on Android, iOS, Web, Windows, macOS, and Linux
 
 ## 🌸 Plant Collection
 
 Grow your garden by completing focus sessions of different durations:
-- **Daisy** - Quick focus sessions
-- **Rose** - Medium focus sessions
-- **Oak Tree** - Long focus sessions
 
-The longer you focus, the more rare plants you can unlock!
+### Common (5-15 minutes)
+- 🌼 **White Daisy** - Your first cheerful flower
+- 🌱 **Green Sprout** - The beginning of something beautiful
+- 🌷 **Pink Tulip** - A delicate bloom of early spring
+
+### Uncommon (20-30 minutes)
+- 🌻 **Sunflower** - Bright and always facing the sun
+- 🌿 **Forest Fern** - Elegant plant from deep forest
+- 🌵 **Desert Cactus** - Resilient and strong
+
+### Rare (45-60 minutes)
+- 🌹 **Red Rose** - Earned through dedication
+- 🌸 **Cherry Blossom** - Representing fleeting beauty
+- 🌳 **Oak Sapling** - Strong and steady
+
+### Epic (75-90 minutes)
+- 🌺 **Purple Orchid** - Rare and exotic beauty
+- 🪷 **Lotus Flower** - Symbol of purity and enlightenment
+
+### Legendary (120+ minutes)
+- 🪴 **Ancient Bonsai** - Masterpiece of patience
+- 🌲 **World Tree** - Ultimate achievement for masters
+
+*The longer you focus, the more rare plants you can unlock!*
 
 ## 🚀 Getting Started
 
@@ -54,9 +93,12 @@ flutter run
 ## 🏗️ Built With
 
 - **[Flutter](https://flutter.dev/)** - Cross-platform UI framework
-- **[Riverpod](https://riverpod.dev/)** - State management
+- **[Riverpod](https://riverpod.dev/)** - Powerful state management solution
 - **[Hive](https://docs.hivedb.dev/)** - Fast, lightweight local database
-- **[Lottie](https://pub.dev/packages/lottie)** - Beautiful animations
+- **[Lottie](https://pub.dev/packages/lottie)** - Beautiful JSON animations
+- **[AudioPlayers](https://pub.dev/packages/audioplayers)** - Audio playback for sound effects
+- **[Flutter Local Notifications](https://pub.dev/packages/flutter_local_notifications)** - Local push notifications
+- **[FL Chart](https://pub.dev/packages/fl_chart)** - Beautiful charts for statistics
 
 ## 📱 Platform Support
 
