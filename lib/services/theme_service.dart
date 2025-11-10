@@ -316,10 +316,7 @@ class ThemeService extends Notifier<GardenTheme> {
 }
 
 /// Provider for theme service
-final themeServiceProvider =
-    StateNotifierProvider<ThemeService, GardenTheme>((ref) {
-  return ThemeService();
-});
+final themeServiceProvider = NotifierProvider<ThemeService, GardenTheme>(ThemeService.new);
 
 /// Provider for current theme data
 final currentThemeDataProvider = Provider<ThemeData>((ref) {
