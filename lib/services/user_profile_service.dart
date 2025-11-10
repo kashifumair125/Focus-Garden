@@ -43,25 +43,27 @@ class UserProfile {
 }
 
 /// Service for managing user profile
-class UserProfileService extends StateNotifier<UserProfile?> {
-  final Box _settingsBox;
-
-  UserProfileService(this._settingsBox) : super(null) {
-    _loadProfile();
-  }
+class UserProfileService extends Notifier<UserProfile?> {
+  Box get _settingsBox => Hive.box('settings');
 
   static const String _profileKey = 'userProfile';
 
+  @override
+  UserProfile? build() {
+    return _loadProfile();
+  }
+
   /// Load user profile from storage
-  void _loadProfile() {
+  UserProfile? _loadProfile() {
     final profileData = _settingsBox.get(_profileKey);
     if (profileData != null && profileData is Map) {
       try {
-        state = UserProfile.fromJson(Map<String, dynamic>.from(profileData));
+        return UserProfile.fromJson(Map<String, dynamic>.from(profileData));
       } catch (e) {
-        state = null;
+        return null;
       }
     }
+    return null;
   }
 
   /// Save user profile
@@ -115,11 +117,7 @@ class UserProfileService extends StateNotifier<UserProfile?> {
 }
 
 /// Provider for user profile service
-final userProfileProvider =
-    StateNotifierProvider<UserProfileService, UserProfile?>((ref) {
-  final settingsBox = Hive.box('settings');
-  return UserProfileService(settingsBox);
-});
+final userProfileProvider = NotifierProvider<UserProfileService, UserProfile?>(UserProfileService.new);
 
 /// Helper provider to check if onboarding is needed
 final needsOnboardingProvider = Provider<bool>((ref) {
