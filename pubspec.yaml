@@ -17,6 +17,7 @@ dependencies:
   # State Management
   flutter_riverpod: ^3.0.0
   riverpod: ^3.0.0
+  state_notifier: ^1.0.0
   
   # Local Storage
   hive: ^2.2.3
