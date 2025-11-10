@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:state_notifier/state_notifier.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 /// Garden theme model - now plant-based!
@@ -316,7 +315,8 @@ class ThemeService extends Notifier<GardenTheme> {
 }
 
 /// Provider for theme service
-final themeServiceProvider = NotifierProvider<ThemeService, GardenTheme>(ThemeService.new);
+final themeServiceProvider =
+    NotifierProvider<ThemeService, GardenTheme>(ThemeService.new);
 
 /// Provider for current theme data
 final currentThemeDataProvider = Provider<ThemeData>((ref) {

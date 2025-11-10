@@ -16,7 +16,8 @@ class MainNavigation extends ConsumerWidget {
     final navigationService = ref.read(navigationProvider.notifier);
 
     // List of screens for each tab
-    final screens = const [
+    // Note: Cannot use const here as some screens are StatefulWidgets
+    final screens = [
       TimerScreen(),
       GardenScreen(),
       StatsScreen(),
@@ -52,8 +53,14 @@ class MainNavigation extends ConsumerWidget {
     ];
 
     return Scaffold(
-      // Display the current screen
-      body: screens[currentIndex],
+      // Use IndexedStack to keep all screens in memory but only show the active one
+      // This prevents hit test errors and maintains screen state
+      // Each screen has its own Scaffold, so we just need to provide proper constraints
+      body: IndexedStack(
+        index: currentIndex,
+        sizing: StackFit.expand,
+        children: screens,
+      ),
 
       // Bottom navigation bar
       bottomNavigationBar: Container(
@@ -90,22 +97,6 @@ class MainNavigation extends ConsumerWidget {
           ),
         ),
       ),
-
-      // Optional: Add floating action button for quick timer start
-      // (commented out for now, but you can enable it later)
-      /*
-      floatingActionButton: _currentIndex == 0 
-        ? FloatingActionButton(
-            onPressed: () {
-              // Quick start timer functionality
-            },
-            child: const Icon(Icons.play_arrow),
-            backgroundColor: Theme.of(context).primaryColor,
-            tooltip: 'Quick Start',
-          )
-        : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      */
     );
   }
 }

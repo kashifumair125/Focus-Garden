@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:state_notifier/state_notifier.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'storage_service.dart';
 
@@ -308,7 +307,8 @@ class DailyChallengeService {
 }
 
 /// Providers
-final gamificationServiceProvider = NotifierProvider<GamificationService, UserLevel>(GamificationService.new);
+final gamificationServiceProvider =
+    NotifierProvider<GamificationService, UserLevel>(GamificationService.new);
 
 final dailyChallengeServiceProvider = Provider<DailyChallengeService>((ref) {
   final storage = ref.watch(storageServiceProvider);

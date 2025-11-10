@@ -223,6 +223,7 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog>
           ),
         ),
       ),
+      ),
     );
   }
 }
