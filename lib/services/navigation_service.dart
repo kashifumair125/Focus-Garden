@@ -1,8 +1,9 @@
 import 'package:riverpod/riverpod.dart';
 
 /// Service for managing app navigation state
-class NavigationService extends StateNotifier<int> {
-  NavigationService() : super(0); // Start at timer tab (index 0)
+class NavigationService extends Notifier<int> {
+  @override
+  int build() => 0; // Start at timer tab (index 0)
 
   /// Switch to a specific tab by index
   void switchToTab(int index) {
@@ -25,6 +26,4 @@ class NavigationService extends StateNotifier<int> {
 }
 
 /// Provider for navigation state
-final navigationProvider = StateNotifierProvider<NavigationService, int>((ref) {
-  return NavigationService();
-});
+final navigationProvider = NotifierProvider<NavigationService, int>(NavigationService.new);

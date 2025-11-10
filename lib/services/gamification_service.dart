@@ -41,15 +41,10 @@ class UserLevel {
 class GamificationService extends Notifier<UserLevel> {
   StorageService get _storageService => ref.read(storageServiceProvider);
 
-<<<<<<< HEAD
-  GamificationService(this._storageService)
-      : super(_loadCurrentLevel(_storageService));
-=======
   @override
   UserLevel build() {
     return _loadCurrentLevel();
   }
->>>>>>> ae5bfe5e2dd94a8a4cc1529bcf85dcb1ecc9c314
 
   UserLevel _loadCurrentLevel() {
     final box = Hive.box('settings');
@@ -312,15 +307,7 @@ class DailyChallengeService {
 }
 
 /// Providers
-<<<<<<< HEAD
-final gamificationServiceProvider =
-    StateNotifierProvider<GamificationService, UserLevel>((ref) {
-  final storage = ref.watch(storageServiceProvider);
-  return GamificationService(storage);
-});
-=======
 final gamificationServiceProvider = NotifierProvider<GamificationService, UserLevel>(GamificationService.new);
->>>>>>> ae5bfe5e2dd94a8a4cc1529bcf85dcb1ecc9c314
 
 final dailyChallengeServiceProvider = Provider<DailyChallengeService>((ref) {
   final storage = ref.watch(storageServiceProvider);
