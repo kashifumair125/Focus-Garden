@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/plant.dart';
+import '../services/user_profile_service.dart';
+import '../services/encouragement_service.dart';
 
 /// Popup dialog shown when user unlocks a new plant
-class RewardPopup extends StatefulWidget {
+class RewardPopup extends ConsumerStatefulWidget {
   final Plant plant;
   final VoidCallback onContinue;
 
@@ -13,10 +16,10 @@ class RewardPopup extends StatefulWidget {
   });
 
   @override
-  State<RewardPopup> createState() => _RewardPopupState();
+  ConsumerState<RewardPopup> createState() => _RewardPopupState();
 }
 
-class _RewardPopupState extends State<RewardPopup>
+class _RewardPopupState extends ConsumerState<RewardPopup>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
@@ -54,6 +57,17 @@ class _RewardPopupState extends State<RewardPopup>
   void dispose() {
     _animationController.dispose();
     super.dispose();
+  }
+
+  String _getPersonalizedTitle() {
+    final userProfile = ref.read(userProfileProvider);
+    final userName = userProfile?.name ?? 'Friend';
+    final message = EncouragementService.instance.getPlantUnlockMessage(
+      userName,
+      widget.plant.name,
+      rarity: widget.plant.rarity.name,
+    );
+    return message;
   }
 
   @override
@@ -130,12 +144,13 @@ class _RewardPopupState extends State<RewardPopup>
                 const SizedBox(height: 12),
 
                 Text(
-                  'Plant Unlocked!',
+                  _getPersonalizedTitle(),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),

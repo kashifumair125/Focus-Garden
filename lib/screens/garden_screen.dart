@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/storage_service.dart';
 import '../services/audio_service.dart';
+import '../services/navigation_service.dart';
 import '../models/plant.dart';
 import '../widgets/plant_widget.dart';
 import '../widgets/enhanced_ui.dart';
@@ -205,14 +206,19 @@ class _GardenScreenState extends ConsumerState<GardenScreen>
             const SizedBox(height: 32),
             ElevatedButton.icon(
               onPressed: () {
-                // Switch to timer tab
-                // This would require callback to parent navigation
+                // Switch to timer tab and play sound
+                ref.read(navigationProvider.notifier).goToTimer();
+                AudioService.instance.playNotification();
               },
               icon: const Icon(Icons.timer),
               label: const Text('Start Focusing'),
               style: ElevatedButton.styleFrom(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                backgroundColor: const Color(0xFF4CAF50),
+                foregroundColor: Colors.white,
+                elevation: 4,
+                shadowColor: const Color(0xFF4CAF50).withOpacity(0.5),
               ),
             ),
           ],

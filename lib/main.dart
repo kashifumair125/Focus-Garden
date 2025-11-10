@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'models/focus_session.dart';
 import 'models/plant.dart';
-import 'screens/main_navigation.dart';
+import 'screens/app_wrapper.dart';
 import 'services/theme_service.dart';
 import 'services/notification_service.dart';
 
@@ -46,8 +46,8 @@ class FocusGardenApp extends ConsumerWidget {
       title: 'Focus Garden',
       theme: themeData,
 
-      // Set the main navigation as home
-      home: const MainNavigation(),
+      // Set the app wrapper as home (handles onboarding)
+      home: const AppWrapper(),
 
       // Remove debug banner for cleaner look
       debugShowCheckedModeBanner: false,
