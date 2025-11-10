@@ -58,27 +58,45 @@ class _AppWrapperState extends ConsumerState<AppWrapper> {
   void _checkNameInput() {
     // Check if user needs to input their name
     if (ref.read(needsOnboardingProvider)) {
-      _currentState = AppState.nameInput;
-      // Show welcome dialog after a short delay
+      setState(() {
+        _currentState = AppState.nameInput;
+      });
+      // Show welcome dialog after a short delay to ensure context is ready
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _showWelcomeDialog();
+        if (mounted && _currentState == AppState.nameInput) {
+          _showWelcomeDialog();
+        }
       });
     } else {
-      _currentState = AppState.main;
+      setState(() {
+        _currentState = AppState.main;
+      });
     }
   }
 
   void _showWelcomeDialog() {
     if (mounted && _currentState == AppState.nameInput) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const WelcomeDialog(),
-      ).then((_) {
-        // After dialog is closed, move to main app
-        if (mounted) {
-          setState(() {
-            _currentState = AppState.main;
+      // Use a small delay to ensure the scaffold is fully built
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted && _currentState == AppState.nameInput) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => const WelcomeDialog(),
+          ).then((_) {
+            // After dialog is closed, move to main app
+            if (mounted) {
+              setState(() {
+                _currentState = AppState.main;
+              });
+            }
+          }).catchError((error) {
+            // If dialog fails, still move to main app
+            if (mounted) {
+              setState(() {
+                _currentState = AppState.main;
+              });
+            }
           });
         }
       });
@@ -95,6 +113,15 @@ class _AppWrapperState extends ConsumerState<AppWrapper> {
         return OnboardingScreen(onComplete: _onOnboardingComplete);
 
       case AppState.nameInput:
+        // Show a blank scaffold while waiting for dialog
+        // The dialog will be shown via addPostFrameCallback
+        return Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          body: const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+
       case AppState.main:
         return const MainNavigation();
     }
