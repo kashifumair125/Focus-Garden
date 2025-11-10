@@ -46,13 +46,17 @@ class _DurationSelectorState extends State<DurationSelector> {
 
             const SizedBox(height: 16),
 
-            // Quick options
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: quickOptions
-                  .map((duration) => _buildQuickOption(duration))
-                  .toList(),
+            // Quick options - constrained to prevent overflow
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: double.infinity),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                alignment: WrapAlignment.start,
+                children: quickOptions
+                    .map((duration) => _buildQuickOption(duration))
+                    .toList(),
+              ),
             ),
 
             const SizedBox(height: 20),
@@ -99,33 +103,43 @@ class _DurationSelectorState extends State<DurationSelector> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Custom Duration',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[700],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                '${selectedDuration} min',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).primaryColor,
+        // Header row with proper constraints
+        LayoutBuilder(
+          builder: (context, constraints) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Text(
+                    'Custom Duration',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey[700],
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              ),
-            ),
-          ],
+                const SizedBox(width: 8),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '${selectedDuration} min',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
 
         const SizedBox(height: 12),
@@ -153,25 +167,28 @@ class _DurationSelectorState extends State<DurationSelector> {
           ),
         ),
 
-        // Helper text
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              '5 min',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[500],
+        // Helper text with proper constraints
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '5 min',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[500],
+                ),
               ),
-            ),
-            Text(
-              '2 hours',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[500],
+              Text(
+                '2 hours',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[500],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );

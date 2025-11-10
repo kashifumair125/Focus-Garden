@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/storage_service.dart';
+import '../services/user_profile_service.dart';
+import '../services/encouragement_service.dart';
+import '../services/timer_service.dart';
 import '../models/focus_session.dart';
 
 /// Statistics screen showing user's focus data and achievements
@@ -31,6 +34,16 @@ class StatsScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Personalized greeting header
+            _buildGreetingHeader(context, ref, stats),
+
+            const SizedBox(height: 16),
+
+            // Real-time activity indicator
+            _buildRealTimeStatus(context, ref),
+
+            const SizedBox(height: 24),
+
             // Key metrics cards
             _buildKeyMetrics(context, stats),
 
@@ -48,6 +61,132 @@ class StatsScreen extends ConsumerWidget {
 
             // Weekly overview
             _buildWeeklyOverview(context, storageService),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build personalized greeting header
+  Widget _buildGreetingHeader(
+      BuildContext context, WidgetRef ref, Map<String, dynamic> stats) {
+    final userProfile = ref.watch(userProfileProvider);
+    final userName = userProfile?.name ?? 'Friend';
+    final message = EncouragementService.instance.getTimeBasedMessage(userName);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: const Color(0xFF4CAF50).withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  userProfile?.avatarEmoji ?? '🌱',
+                  style: const TextStyle(fontSize: 24),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    message,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF2E7D32),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    EncouragementService.instance.getFunFact(),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build real-time activity status
+  Widget _buildRealTimeStatus(BuildContext context, WidgetRef ref) {
+    final timerState = ref.watch(timerProvider);
+    final userProfile = ref.watch(userProfileProvider);
+    final userName = userProfile?.name ?? 'Friend';
+
+    if (timerState.status != TimerStatus.running &&
+        timerState.status != TimerStatus.paused) {
+      return const SizedBox.shrink();
+    }
+
+    final isRunning = timerState.status == TimerStatus.running;
+    final statusText = isRunning
+        ? '$userName is focusing right now! ⏱️'
+        : 'Session paused - Take your time! ⏸️';
+    final statusColor = isRunning ? Colors.green : Colors.orange;
+
+    return Card(
+      color: statusColor.withOpacity(0.1),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: statusColor,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    statusText,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: statusColor,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${timerState.formattedTime} remaining of ${timerState.totalMinutes}min session',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isRunning)
+              const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                ),
+              ),
           ],
         ),
       ),

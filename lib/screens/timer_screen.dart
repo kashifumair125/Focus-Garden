@@ -6,6 +6,8 @@ import '../services/reward_service.dart';
 import '../services/audio_service.dart';
 import '../services/gamification_service.dart';
 import '../services/quotes_service.dart';
+import '../services/user_profile_service.dart';
+import '../services/encouragement_service.dart';
 import '../models/focus_session.dart';
 import '../models/plant.dart';
 import '../widgets/circular_timer.dart';
@@ -139,9 +141,16 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
                     onStart: () {
                       _sessionStartTime = DateTime.now();
                       timerService.start();
+                      _showStartMessage();
                     },
-                    onPause: timerService.pause,
-                    onResume: timerService.resume,
+                    onPause: () {
+                      timerService.pause();
+                      _showPauseMessage();
+                    },
+                    onResume: () {
+                      timerService.resume();
+                      _showResumeMessage();
+                    },
                     onReset: () {
                       _sessionStartTime = null;
                       timerService.reset();
@@ -332,17 +341,109 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
 
   /// Show simple completion message when no new plant is unlocked
   void _showCompletionMessage() {
+    final userProfile = ref.read(userProfileProvider);
+    final userName = userProfile?.name ?? 'Friend';
+    final stats = ref.read(statsProvider);
+    final completedMinutes = ref.read(timerProvider).totalMinutes;
+    final currentStreak = stats['currentStreak'] as int;
+
+    final message = EncouragementService.instance.getCompletionMessage(
+      userName,
+      completedMinutes,
+      streak: currentStreak > 0 ? currentStreak : null,
+    );
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Row(
+        content: Row(
           children: [
-            Icon(Icons.check_circle, color: Colors.white),
-            SizedBox(width: 8),
-            Text('Focus session completed! 🎉'),
+            const Icon(Icons.check_circle, color: Colors.white),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(fontSize: 15),
+              ),
+            ),
           ],
         ),
         backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 4),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
+
+  /// Show encouraging message when user starts a session
+  void _showStartMessage() {
+    final userProfile = ref.read(userProfileProvider);
+    final userName = userProfile?.name ?? 'Friend';
+    final stats = ref.read(statsProvider);
+    final sessionCount = stats['completedSessions'] as int;
+
+    final message = EncouragementService.instance.getStartMessage(
+      userName,
+      sessionCount: sessionCount,
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.rocket_launch, color: Colors.white),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(fontSize: 15),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF4CAF50),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 3),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
+
+  /// Show message when user pauses
+  void _showPauseMessage() {
+    final userProfile = ref.read(userProfileProvider);
+    final userName = userProfile?.name ?? 'Friend';
+    final message = EncouragementService.instance.getPauseMessage(userName);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.orange,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
+
+  /// Show message when user resumes
+  void _showResumeMessage() {
+    final userProfile = ref.read(userProfileProvider);
+    final userName = userProfile?.name ?? 'Friend';
+    final message = EncouragementService.instance.getResumeMessage(userName);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: const Color(0xFF4CAF50),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
