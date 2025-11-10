@@ -24,13 +24,14 @@ class PlantAdapter extends TypeAdapter<Plant> {
       unlockedAt: fields[4] as DateTime,
       requiredMinutes: fields[5] as int,
       rarity: fields[6] as PlantRarity,
+      animationPath: fields[7] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Plant obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -44,7 +45,9 @@ class PlantAdapter extends TypeAdapter<Plant> {
       ..writeByte(5)
       ..write(obj.requiredMinutes)
       ..writeByte(6)
-      ..write(obj.rarity);
+      ..write(obj.rarity)
+      ..writeByte(7)
+      ..write(obj.animationPath);
   }
 
   @override
