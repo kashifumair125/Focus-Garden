@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:state_notifier/state_notifier.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'storage_service.dart';
 
@@ -41,7 +42,8 @@ class UserLevel {
 class GamificationService extends StateNotifier<UserLevel> {
   final StorageService _storageService;
 
-  GamificationService(this._storageService) : super(_loadCurrentLevel(_storageService));
+  GamificationService(this._storageService)
+      : super(_loadCurrentLevel(_storageService));
 
   static UserLevel _loadCurrentLevel(StorageService storage) {
     final box = Hive.box('settings');
@@ -141,26 +143,26 @@ class DailyChallenge {
   });
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'title': title,
-    'description': description,
-    'targetMinutes': targetMinutes,
-    'targetSessions': targetSessions,
-    'xpReward': xpReward,
-    'date': date.toIso8601String(),
-    'isCompleted': isCompleted,
-  };
+        'id': id,
+        'title': title,
+        'description': description,
+        'targetMinutes': targetMinutes,
+        'targetSessions': targetSessions,
+        'xpReward': xpReward,
+        'date': date.toIso8601String(),
+        'isCompleted': isCompleted,
+      };
 
   factory DailyChallenge.fromJson(Map<String, dynamic> json) => DailyChallenge(
-    id: json['id'],
-    title: json['title'],
-    description: json['description'],
-    targetMinutes: json['targetMinutes'],
-    targetSessions: json['targetSessions'],
-    xpReward: json['xpReward'],
-    date: DateTime.parse(json['date']),
-    isCompleted: json['isCompleted'] ?? false,
-  );
+        id: json['id'],
+        title: json['title'],
+        description: json['description'],
+        targetMinutes: json['targetMinutes'],
+        targetSessions: json['targetSessions'],
+        xpReward: json['xpReward'],
+        date: DateTime.parse(json['date']),
+        isCompleted: json['isCompleted'] ?? false,
+      );
 }
 
 /// Service to manage daily challenges
@@ -177,7 +179,8 @@ class DailyChallengeService {
     final savedChallengeJson = box.get('dailyChallenge_$todayKey');
 
     if (savedChallengeJson != null) {
-      return DailyChallenge.fromJson(Map<String, dynamic>.from(savedChallengeJson));
+      return DailyChallenge.fromJson(
+          Map<String, dynamic>.from(savedChallengeJson));
     }
 
     // Generate new challenge for today
@@ -250,13 +253,12 @@ class DailyChallengeService {
     final completedSessions = todaySessions.where((s) => s.completed).toList();
 
     final totalMinutes = completedSessions.fold<int>(
-      0, (sum, session) => sum + session.actualMinutes
-    );
+        0, (sum, session) => sum + session.actualMinutes);
 
     bool meetsSessionTarget = challenge.targetSessions == 0 ||
-                               completedSessions.length >= challenge.targetSessions;
-    bool meetsMinutesTarget = challenge.targetMinutes == 0 ||
-                               totalMinutes >= challenge.targetMinutes;
+        completedSessions.length >= challenge.targetSessions;
+    bool meetsMinutesTarget =
+        challenge.targetMinutes == 0 || totalMinutes >= challenge.targetMinutes;
 
     final isComplete = meetsSessionTarget && meetsMinutesTarget;
 
@@ -286,15 +288,15 @@ class DailyChallengeService {
     final completedSessions = todaySessions.where((s) => s.completed).toList();
 
     final totalMinutes = completedSessions.fold<int>(
-      0, (sum, session) => sum + session.actualMinutes
-    );
+        0, (sum, session) => sum + session.actualMinutes);
 
     return {
       'challenge': challenge,
       'currentSessions': completedSessions.length,
       'currentMinutes': totalMinutes,
       'sessionProgress': challenge.targetSessions > 0
-          ? (completedSessions.length / challenge.targetSessions).clamp(0.0, 1.0)
+          ? (completedSessions.length / challenge.targetSessions)
+              .clamp(0.0, 1.0)
           : 1.0,
       'minuteProgress': challenge.targetMinutes > 0
           ? (totalMinutes / challenge.targetMinutes).clamp(0.0, 1.0)
@@ -304,7 +306,8 @@ class DailyChallengeService {
 }
 
 /// Providers
-final gamificationServiceProvider = StateNotifierProvider<GamificationService, UserLevel>((ref) {
+final gamificationServiceProvider =
+    StateNotifierProvider<GamificationService, UserLevel>((ref) {
   final storage = ref.watch(storageServiceProvider);
   return GamificationService(storage);
 });

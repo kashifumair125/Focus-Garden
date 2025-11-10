@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:state_notifier/state_notifier.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 /// Garden theme model - now plant-based!
@@ -85,7 +86,8 @@ class ThemeService extends StateNotifier<GardenTheme> {
 
   void _loadSavedTheme() {
     final box = Hive.box('settings');
-    final savedThemeId = box.get('currentTheme', defaultValue: 'classic') as String;
+    final savedThemeId =
+        box.get('currentTheme', defaultValue: 'classic') as String;
     final theme = availableThemes.firstWhere(
       (t) => t.id == savedThemeId,
       orElse: () => _getDefaultTheme(),
@@ -313,7 +315,8 @@ class ThemeService extends StateNotifier<GardenTheme> {
 }
 
 /// Provider for theme service
-final themeServiceProvider = StateNotifierProvider<ThemeService, GardenTheme>((ref) {
+final themeServiceProvider =
+    StateNotifierProvider<ThemeService, GardenTheme>((ref) {
   return ThemeService();
 });
 
