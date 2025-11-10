@@ -32,7 +32,10 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
   @override
   void initState() {
     super.initState();
-    _loadMotivationalQuote();
+    // Load quote after the first frame to ensure providers are initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadMotivationalQuote();
+    });
   }
 
   void _loadMotivationalQuote() {

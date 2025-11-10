@@ -32,37 +32,48 @@ class _AppWrapperState extends ConsumerState<AppWrapper> {
   }
 
   void _onSplashComplete() {
-    setState(() {
-      // Check if user has seen onboarding
-      final settingsBox = Hive.box('settings');
-      final hasSeenOnboarding = settingsBox.get('hasSeenOnboarding', defaultValue: false) as bool;
+    // Check if user has seen onboarding
+    final settingsBox = Hive.box('settings');
+    final hasSeenOnboarding = settingsBox.get('hasSeenOnboarding', defaultValue: false) as bool;
 
-      if (!hasSeenOnboarding) {
+    if (!hasSeenOnboarding) {
+      setState(() {
         _currentState = AppState.onboarding;
-      } else {
-        _checkNameInput();
-      }
-    });
+      });
+    } else {
+      _checkNameInput();
+    }
   }
 
   void _onOnboardingComplete() {
     // Mark onboarding as seen
     final settingsBox = Hive.box('settings');
     settingsBox.put('hasSeenOnboarding', true);
-
-    setState(() {
-      _checkNameInput();
-    });
+    _checkNameInput();
   }
 
   void _checkNameInput() {
     // Check if user needs to input their name
-    if (ref.read(needsOnboardingProvider)) {
-      setState(() {
+    final needsOnboarding = ref.read(needsOnboardingProvider);
+
+    setState(() {
+      if (needsOnboarding) {
+        setState(() {
         _currentState = AppState.nameInput;
       });
-      // Show welcome dialog after a short delay to ensure context is ready
+      } else {
+        _currentState = AppState.main;
+      }
+    });
+
+    // Show welcome dialog after the frame is fully rendered
+    // Use a delayed callback to ensure MainNavigation is fully laid out
+    if (needsOnboarding) { to ensure context is ready
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Add an additional delay to ensure layout is complete
+        Future.delayed(const Duration(milliseconds: 300), () {
+          _showWelcomeDialog();
+        });
         if (mounted && _currentState == AppState.nameInput) {
           _showWelcomeDialog();
         }
