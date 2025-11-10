@@ -51,7 +51,7 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog>
     if (_formKey.currentState!.validate()) {
       final name = _nameController.text.trim();
       await ref.read(userProfileProvider.notifier).saveProfile(name);
-      AudioService.instance.playSuccess();
+      AudioService.instance.playCelebration();
       if (mounted) {
         Navigator.of(context).pop();
       }
