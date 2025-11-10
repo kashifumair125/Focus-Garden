@@ -1,5 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:state_notifier/state_notifier.dart';
+import 'package:riverpod/riverpod.dart';
 
 /// Service for managing app navigation state
 class NavigationService extends StateNotifier<int> {
