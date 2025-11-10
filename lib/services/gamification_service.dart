@@ -38,12 +38,15 @@ class UserLevel {
 }
 
 /// Service to handle gamification features (XP, levels, challenges)
-class GamificationService extends StateNotifier<UserLevel> {
-  final StorageService _storageService;
+class GamificationService extends Notifier<UserLevel> {
+  StorageService get _storageService => ref.read(storageServiceProvider);
 
-  GamificationService(this._storageService) : super(_loadCurrentLevel(_storageService));
+  @override
+  UserLevel build() {
+    return _loadCurrentLevel();
+  }
 
-  static UserLevel _loadCurrentLevel(StorageService storage) {
+  UserLevel _loadCurrentLevel() {
     final box = Hive.box('settings');
     final totalXP = box.get('totalXP', defaultValue: 0) as int;
 
@@ -304,10 +307,7 @@ class DailyChallengeService {
 }
 
 /// Providers
-final gamificationServiceProvider = StateNotifierProvider<GamificationService, UserLevel>((ref) {
-  final storage = ref.watch(storageServiceProvider);
-  return GamificationService(storage);
-});
+final gamificationServiceProvider = NotifierProvider<GamificationService, UserLevel>(GamificationService.new);
 
 final dailyChallengeServiceProvider = Provider<DailyChallengeService>((ref) {
   final storage = ref.watch(storageServiceProvider);

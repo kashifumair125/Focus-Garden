@@ -68,23 +68,24 @@ class GardenTheme {
 }
 
 /// Service to manage app themes
-class ThemeService extends StateNotifier<GardenTheme> {
-  ThemeService() : super(_getDefaultTheme()) {
-    _loadSavedTheme();
+class ThemeService extends Notifier<GardenTheme> {
+  @override
+  GardenTheme build() {
+    return _loadSavedTheme();
   }
 
   static GardenTheme _getDefaultTheme() {
     return availableThemes.first;
   }
 
-  void _loadSavedTheme() {
+  GardenTheme _loadSavedTheme() {
     final box = Hive.box('settings');
     final savedThemeId = box.get('currentTheme', defaultValue: 'classic') as String;
     final theme = availableThemes.firstWhere(
       (t) => t.id == savedThemeId,
       orElse: () => _getDefaultTheme(),
     );
-    state = theme;
+    return theme;
   }
 
   /// Switch to a different theme
@@ -225,9 +226,7 @@ class ThemeService extends StateNotifier<GardenTheme> {
 }
 
 /// Provider for theme service
-final themeServiceProvider = StateNotifierProvider<ThemeService, GardenTheme>((ref) {
-  return ThemeService();
-});
+final themeServiceProvider = NotifierProvider<ThemeService, GardenTheme>(ThemeService.new);
 
 /// Provider for current theme data
 final currentThemeDataProvider = Provider<ThemeData>((ref) {
