@@ -79,9 +79,10 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog>
                 ),
               ],
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                 // Welcome icon
                 Container(
                   width: 80,
@@ -219,6 +220,8 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog>
                 ),
               ],
             ),
+          ),
+        ),
           ),
         ),
       ),

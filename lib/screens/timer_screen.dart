@@ -36,33 +36,46 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
   }
 
   void _loadMotivationalQuote() {
-    final stats = ref.read(statsProvider);
-    final quote = QuotesService.instance.getContextualQuote(
-      currentStreak: stats['currentStreak'] as int,
-      totalSessions: stats['completedSessions'] as int,
-    );
-    setState(() {
-      _motivationalQuote = quote['text']!;
-      _quoteAuthor = quote['author']!;
-    });
+    try {
+      final stats = ref.read(statsProvider);
+      final quote = QuotesService.instance.getContextualQuote(
+        currentStreak: stats['currentStreak'] as int? ?? 0,
+        totalSessions: stats['completedSessions'] as int? ?? 0,
+      );
+      if (mounted) {
+        setState(() {
+          _motivationalQuote = quote['text'] ?? '';
+          _quoteAuthor = quote['author'] ?? '';
+        });
+      }
+    } catch (e) {
+      // Fallback to a default quote if there's an error
+      if (mounted) {
+        setState(() {
+          _motivationalQuote = 'Focus is the art of knowing what to ignore.';
+          _quoteAuthor = 'James Clear';
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final timerState = ref.watch(timerProvider);
-    final timerService = ref.read(timerProvider.notifier);
-    final userLevel = ref.watch(gamificationServiceProvider);
-    final challengeProgress = ref.watch(challengeProgressProvider);
+    try {
+      final timerState = ref.watch(timerProvider);
+      final timerService = ref.read(timerProvider.notifier);
+      final userLevel = ref.watch(gamificationServiceProvider);
+      final challengeProgress = ref.watch(challengeProgressProvider);
 
-    // Listen for timer completion
-    ref.listen<TimerState>(timerProvider, (previous, current) {
-      if (previous?.status != TimerStatus.completed &&
-          current.status == TimerStatus.completed) {
-        _onTimerCompleted(current);
-      }
-    });
+      // Listen for timer completion
+      ref.listen<TimerState>(timerProvider, (previous, current) {
+        if (previous?.status != TimerStatus.completed &&
+            current.status == TimerStatus.completed) {
+          _onTimerCompleted(current);
+        }
+      });
 
-    return Scaffold(
+      return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA), // Light background
       appBar: AppBar(
         title: const Text(
@@ -166,6 +179,59 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
         ),
       ),
     );
+    } catch (e) {
+      // If there's an error in the providers, show an error screen
+      return Scaffold(
+        backgroundColor: const Color(0xFFF8F9FA),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(40.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  size: 80,
+                  color: Color(0xFF4CAF50),
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  'Something went wrong',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF2E7D32),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Error: ${e.toString()}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      // Try to reload
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF4CAF50),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  ),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
   }
 
   /// Build session info widget (shows current streak, next reward, etc.)
